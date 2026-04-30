@@ -653,9 +653,8 @@ export default function Page() {
       {/* Top nav */}
       <div style={{ position: 'relative', zIndex: 2, borderBottom: '1px solid rgba(255,255,255,0.055)', padding: '11px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(8,8,8,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <img src="/Logo_Only_Transparent.png" alt="Semper Mind" style={{ height: 32, width: 'auto', objectFit: 'contain' }} />
+          <img src="/Logo Only Transparent.png" alt="Semper Mind" style={{ height: 28, width: 'auto', objectFit: 'contain' }} />
           <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 15, fontWeight: 700, color: '#fff', letterSpacing: '0.12em' }}>SEMPER MIND</span>
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.2)', paddingLeft: 10, borderLeft: '1px solid rgba(255,255,255,0.08)' }}>Forté Debrief AI</span>
         </div>
         {screen === 'debrief' && (
           <button
