@@ -60,7 +60,7 @@ function Waveform({ analyserRef, isPlaying }) {
 
 // ─── MINI GRAPH ───────────────────────────────────────────────────────────────
 function MiniGraph({ vals, color, label }) {
-  const W = 190, H = 72;
+  const W = 190, H = 88;
   const padL = 10, padR = 10, padT = 12, padB = 14;
   const midY = padT + (H - padT - padB) / 2;
   const range = 36;
@@ -230,9 +230,9 @@ function Bubble({ msg, isLast, isSpeaking, analyserRef }) {
       )}
       <div style={{
         maxWidth: '80%',
-        background: ai ? 'rgba(255,255,255,0.045)' : 'rgba(214,26,26,0.11)',
+        background: ai ? 'rgba(255,255,255,0.045)' : '#ffffff',
         backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-        border: ai ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(214,26,26,0.22)',
+        border: ai ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(214,26,26,0.3)',
         borderRadius: ai ? '3px 16px 16px 16px' : '16px 3px 16px 16px',
         padding: ai && isLast && isSpeaking ? '16px 18px 10px' : '13px 17px',
         transition: 'padding .3s',
@@ -242,7 +242,7 @@ function Bubble({ msg, isLast, isSpeaking, analyserRef }) {
             <Waveform analyserRef={analyserRef} isPlaying={isSpeaking} />
           </div>
         )}
-        <p style={{ fontSize: 15, lineHeight: 1.68, color: ai ? 'rgba(255,255,255,0.88)' : 'rgba(255,255,255,0.82)', margin: 0, whiteSpace: 'pre-wrap' }}>
+        <p style={{ fontSize: 15, lineHeight: 1.68, color: ai ? 'rgba(255,255,255,0.88)' : '#d61a1a', margin: 0, whiteSpace: 'pre-wrap' }}>
           {msg.content}
         </p>
       </div>
@@ -389,14 +389,11 @@ function DebriefScreen({ name, file }) {
         const data = await res.json();
         if (data.error) throw new Error(data.error);
 
-        const raw = data.text;
+        const cleanReply = data.text;
 
-        // Parse and strip GRAPHDATA line
-        const gdMatch = raw.match(/^GRAPHDATA:(.+)$/m);
-        const cleanReply = raw.replace(/^GRAPHDATA:[^\n]*\n?/m, '').trim();
-
-        if (gdMatch) {
-          const line = gdMatch[1];
+        // Parse graph data from the server-provided graphDataLine
+        if (data.graphDataLine) {
+          const line = data.graphDataLine;
           const parseNums = (key) => {
             const m = line.match(new RegExp(key + '=\\[([^\\]]+)\\]'));
             return m ? m[1].split(',').map((n) => parseInt(n.trim())) : null;
@@ -653,7 +650,7 @@ export default function Page() {
       {/* Top nav */}
       <div style={{ position: 'relative', zIndex: 2, borderBottom: '1px solid rgba(255,255,255,0.055)', padding: '11px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(8,8,8,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <img src="/Logo Only Transparent.png" alt="Semper Mind" style={{ height: 28, width: 'auto', objectFit: 'contain' }} />
+          <img src="/Logo Only Transparent.png" alt="Semper Mind" style={{ height: 44, width: 'auto', objectFit: 'contain' }} />
           <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 15, fontWeight: 700, color: '#fff', letterSpacing: '0.12em' }}>SEMPER MIND</span>
         </div>
         {screen === 'debrief' && (
