@@ -294,7 +294,7 @@ function UploadScreen({ onComplete }) {
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="First name is fine"
+            placeholder=""
             onKeyDown={(e) => e.key === 'Enter' && ready && onComplete({ name: name.trim(), file })}
             style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#fff', fontSize: 16, padding: '14px 18px', outline: 'none', fontFamily: 'inherit' }}
           />
@@ -569,9 +569,12 @@ function DebriefScreen({ name, file }) {
         {/* Header */}
         <Glass style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
           <div>
-            <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 20, fontWeight: 700, color: '#fff' }}>Forté Debrief</div>
+            <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 20, fontWeight: 700, color: '#fff' }}>Communication Style Debrief</div>
             <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.32)', marginTop: 1 }}>
-              {isSpeaking ? 'Facilitator speaking...' : isListening ? 'Listening to you...' : 'Your personalized 1:1 session'}
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 6px #22c55e', display: 'inline-block', flexShrink: 0 }} />
+                {isSpeaking ? 'Facilitator speaking...' : isListening ? 'Listening to you...' : 'Session Live'}
+              </span>
             </div>
           </div>
           <div
@@ -650,11 +653,7 @@ export default function Page() {
       {/* Top nav */}
       <div style={{ position: 'relative', zIndex: 2, borderBottom: '1px solid rgba(255,255,255,0.055)', padding: '11px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(8,8,8,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <svg width="22" height="18" viewBox="0 0 22 18" fill="none">
-            <rect y="0" width="22" height="2.5" rx="1.25" fill="#d61a1a" />
-            <rect y="7.5" width="22" height="2.5" rx="1.25" fill="#d61a1a" />
-            <rect y="15" width="22" height="2.5" rx="1.25" fill="#d61a1a" />
-          </svg>
+          <img src="/Logo_Only_Transparent.png" alt="Semper Mind" style={{ height: 32, width: 'auto', objectFit: 'contain' }} />
           <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 15, fontWeight: 700, color: '#fff', letterSpacing: '0.12em' }}>SEMPER MIND</span>
           <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.2)', paddingLeft: 10, borderLeft: '1px solid rgba(255,255,255,0.08)' }}>Forté Debrief AI</span>
         </div>
