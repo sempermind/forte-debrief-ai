@@ -392,16 +392,29 @@ function DebriefScreen({ name, file }) {
         const raw = data.text;
 
         // Parse and strip GRAPHDATA line
-        const gdMatch = raw.match(/^GRAPHDATA:\s*primary=\[([^\]]+)\]\s+adapting=\[([^\]]+)\]\s+perceiver=\[([^\]]+)\]/m);
+        const gdMatch = raw.match(/^GRAPHDATA:(.+)$/m);
         const cleanReply = raw.replace(/^GRAPHDATA:[^\n]*\n?/m, '').trim();
 
         if (gdMatch) {
-          const parse = (s) => s.split(',').map((n) => parseInt(n.trim()));
+          const line = gdMatch[1];
+          const parseNums = (key) => {
+            const m = line.match(new RegExp(key + '=\\[([^\\]]+)\\]'));
+            return m ? m[1].split(',').map((n) => parseInt(n.trim())) : null;
+          };
+          const parseStr = (key) => {
+            const m = line.match(new RegExp(key + '=\"([^\"]+)\"'));
+            return m ? m[1] : null;
+          };
           setSnapshot((prev) => ({
             ...prev,
-            primaryVals: parse(gdMatch[1]),
-            adaptingVals: parse(gdMatch[2]),
-            perceiverVals: parse(gdMatch[3]),
+            primaryVals: parseNums('primary') || prev.primaryVals,
+            adaptingVals: parseNums('adapting') || prev.adaptingVals,
+            perceiverVals: parseNums('perceiver') || prev.perceiverVals,
+            primary: parseStr('primaryStrength') || prev.primary,
+            secondary: parseStr('secondaryStrength') || prev.secondary,
+            logic: parseStr('logic') || prev.logic,
+            stamina: parseStr('stamina') || prev.stamina,
+            goals: parseStr('goals') || prev.goals,
           }));
         }
 
