@@ -131,7 +131,12 @@ export async function POST(request) {
       return NextResponse.json({ error: data.error.message }, { status: 400 });
     }
 
-    return NextResponse.json({ text: data.content[0].text });
+    // Strip the GRAPHDATA line from the text before sending to client
+    // but also send the parsed graph data separately so the client can use it
+    const rawText = data.content[0].text;
+    const gdMatch = rawText.match(/^GRAPHDATA:(.+)$/m);
+    const cleanText = rawText.replace(/^GRAPHDATA:.*$/m, '').replace(/^\s*\n/, '').trim();
+    return NextResponse.json({ text: cleanText, graphDataLine: gdMatch ? gdMatch[0] : null });
   } catch (err) {
     console.error('Debrief API error:', err);
     return NextResponse.json({ error: err.message }, { status: 500 });
