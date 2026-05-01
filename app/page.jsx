@@ -60,8 +60,8 @@ function Waveform({ analyserRef, isPlaying }) {
 
 // ─── MINI GRAPH ───────────────────────────────────────────────────────────────
 function MiniGraph({ vals, color, label }) {
-  const W = 190, H = 88;
-  const padL = 10, padR = 10, padT = 12, padB = 14;
+  const W = 190, H = 108;
+  const padL = 10, padR = 10, padT = 12, padB = 28;
   const midY = padT + (H - padT - padB) / 2;
   const range = 36;
   const totalH = H - padT - padB;
@@ -90,7 +90,7 @@ function MiniGraph({ vals, color, label }) {
         ))}
         {/* Axis labels */}
         {axes.map((a, i) => (
-          <text key={a} x={toX(i)} y={H - 1} textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.28)" fontFamily="DM Sans, sans-serif">{a}</text>
+          <text key={a} x={toX(i)} y={H - 6} textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.28)" fontFamily="DM Sans, sans-serif">{a}</text>
         ))}
         {/* Data line */}
         {points ? (
@@ -718,19 +718,33 @@ export default function Page() {
       <div style={{ position: 'fixed', top: '42%', left: '32%', width: 300, height: 300, background: 'radial-gradient(circle, rgba(214,26,26,0.05) 0%, transparent 70%)', filter: 'blur(110px)', pointerEvents: 'none', zIndex: 0 }} />
 
       {/* Top nav */}
-      <div style={{ position: 'relative', zIndex: 2, borderBottom: '1px solid rgba(255,255,255,0.055)', padding: '11px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(8,8,8,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <img src="/Logo Only Transparent.png" alt="Semper Mind" style={{ height: 56, width: 'auto', objectFit: 'contain' }} />
-          <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 15, fontWeight: 700, color: '#fff', letterSpacing: '0.12em' }}>SEMPER MIND</span>
+      <div style={{ position: 'relative', zIndex: 2, borderBottom: '1px solid rgba(255,255,255,0.055)', padding: '10px 24px', display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', background: 'rgba(8,8,8,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', flexShrink: 0 }}>
+        {/* Left — Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <img src="/Logo Only Transparent.png" alt="Semper Mind" style={{ height: 52, width: 'auto', objectFit: 'contain' }} />
+          <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 14, fontWeight: 700, color: '#fff', letterSpacing: '0.12em' }}>SEMPER MIND</span>
         </div>
-        {screen === 'debrief' && (
-          <button
-            onClick={() => { setScreen('upload'); setSession(null); }}
-            style={{ background: 'none', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 7, color: 'rgba(255,255,255,0.42)', fontSize: 12, padding: '6px 12px', cursor: 'pointer', fontFamily: 'inherit' }}
-          >
-            New Session
-          </button>
-        )}
+        {/* Center — Session Title */}
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 20, fontWeight: 800, color: '#fff', letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+            Forté Communication Style Debrief
+          </div>
+        </div>
+        {/* Right — Session Live + New Session */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 20, padding: '5px 13px' }}>
+            <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 6px #22c55e' }} />
+            <span style={{ fontSize: 12, color: '#22c55e', fontWeight: 600, letterSpacing: '0.04em' }}>Session Live</span>
+          </div>
+          {screen === 'debrief' && (
+            <button
+              onClick={() => { setScreen('upload'); setSession(null); }}
+              style={{ background: 'none', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 7, color: 'rgba(255,255,255,0.42)', fontSize: 12, padding: '6px 12px', cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              New Session
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Screen */}
