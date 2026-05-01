@@ -164,6 +164,7 @@ function ProfilePanel({ name, snapshot }) {
       <div>
         <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.32)', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 4 }}>Participant</div>
         <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 22, fontWeight: 700, color: '#fff' }}>{name}</div>
+        {snapshot.role && <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 3 }}>{snapshot.role}</div>}
       </div>
 
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} />
@@ -234,7 +235,7 @@ function Bubble({ msg, isLast, isSpeaking, analyserRef }) {
         maxWidth: '80%',
         background: ai ? 'rgba(255,255,255,0.045)' : '#ffffff',
         backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-        border: ai ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(214,26,26,0.3)',
+        border: ai ? '1px solid rgba(214,26,26,0.5)' : '1px solid rgba(214,26,26,0.3)',
         borderRadius: ai ? '3px 16px 16px 16px' : '16px 3px 16px 16px',
         padding: ai && isLast && isSpeaking ? '16px 18px 10px' : '13px 17px',
         transition: 'padding .3s',
@@ -267,6 +268,7 @@ function TypingDots() {
 // ─── UPLOAD SCREEN ────────────────────────────────────────────────────────────
 function UploadScreen({ onComplete }) {
   const [name, setName] = useState('');
+  const [role, setRole] = useState('');
   const [file, setFile] = useState(null);
   const [drag, setDrag] = useState(false);
   const fileRef = useRef();
@@ -289,7 +291,7 @@ function UploadScreen({ onComplete }) {
         </div>
 
         {/* Name */}
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 18 }}>
           <label style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.42)', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>
             Your Name
           </label>
@@ -297,7 +299,21 @@ function UploadScreen({ onComplete }) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder=""
-            onKeyDown={(e) => e.key === 'Enter' && ready && onComplete({ name: name.trim(), file })}
+            onKeyDown={(e) => e.key === 'Enter' && ready && onComplete({ name: name.trim(), role: role.trim(), file })}
+            style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#fff', fontSize: 16, padding: '14px 18px', outline: 'none', fontFamily: 'inherit' }}
+          />
+        </div>
+
+        {/* Role */}
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.42)', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>
+            Your Role
+          </label>
+          <input
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            placeholder="e.g. CEO, Sales Manager, HR Director..."
+            onKeyDown={(e) => e.key === 'Enter' && ready && onComplete({ name: name.trim(), role: role.trim(), file })}
             style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#fff', fontSize: 16, padding: '14px 18px', outline: 'none', fontFamily: 'inherit' }}
           />
         </div>
@@ -336,7 +352,7 @@ function UploadScreen({ onComplete }) {
           </div>
         </div>
 
-        <RedBtn onClick={() => onComplete({ name: name.trim(), file })} disabled={!ready} style={{ width: '100%' }}>
+        <RedBtn onClick={() => onComplete({ name: name.trim(), role: role.trim(), file })} disabled={!ready} style={{ width: '100%' }}>
           BEGIN MY DEBRIEF →
         </RedBtn>
       </Glass>
@@ -345,14 +361,14 @@ function UploadScreen({ onComplete }) {
 }
 
 // ─── DEBRIEF SCREEN ───────────────────────────────────────────────────────────
-function DebriefScreen({ name, file }) {
+function DebriefScreen({ name, role, file }) {
   const [msgs, setMsgs] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [voiceOn, setVoiceOn] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [snapshot, setSnapshot] = useState({});
+  const [snapshot, setSnapshot] = useState({ role });
 
   // fullHistoryRef stores the complete API-ready conversation
   // [0] = first user msg with PDF, [1] = AI reply, [2] = user, [3] = AI, ...
@@ -376,7 +392,7 @@ function DebriefScreen({ name, file }) {
       setLoading(true);
       try {
         const pdfBase64 = await readFileAsBase64(file);
-        const firstUserContent = `My name is ${name}. I'm ready for my Forté debrief. Please begin.`;
+        const firstUserContent = `My name is ${name}${role ? ` and my role is ${role}` : ''}. I'm ready for my Forté debrief. Please begin.`;
 
         // Call server API route
         const res = await fetch('/api/debrief', {
@@ -746,7 +762,7 @@ export default function Page() {
           <UploadScreen onComplete={(data) => { setSession(data); setScreen('debrief'); }} />
         )}
         {screen === 'debrief' && session && (
-          <DebriefScreen name={session.name} file={session.file} />
+          <DebriefScreen name={session.name} role={session.role || ''} file={session.file} />
         )}
       </div>
     </div>
