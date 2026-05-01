@@ -224,8 +224,8 @@ function Bubble({ msg, isLast, isSpeaking, analyserRef }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: ai ? 'flex-start' : 'flex-end', marginBottom: 18 }}>
       {ai && (
-        <div style={{ fontSize: 10, fontWeight: 700, color: '#d61a1a', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 5, paddingLeft: 2, fontFamily: "'Barlow Condensed', sans-serif" }}>
-          Forté Facilitator
+        <div style={{ marginBottom: 6, paddingLeft: 2 }}>
+          <img src="/Logo Only Transparent.png" alt="Semper Mind" style={{ height: 22, width: 'auto', objectFit: 'contain' }} />
         </div>
       )}
       <div style={{
@@ -632,27 +632,7 @@ function DebriefScreen({ name, file }) {
       </div>
 
       {/* Chat */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, gap: 10 }}>
-        {/* Header */}
-        <Glass style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-          <div>
-            <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 20, fontWeight: 700, color: '#fff' }}>Communication Style Debrief</div>
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.32)', marginTop: 1 }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 6px #22c55e', display: 'inline-block', flexShrink: 0 }} />
-                {isSpeaking ? 'Facilitator speaking...' : isListening ? 'Listening to you...' : 'Session Live'}
-              </span>
-            </div>
-          </div>
-          <div
-            onClick={() => { const n = !voiceOn; setVoiceOn(n); if (!n) stopSpeaking(); }}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', cursor: 'pointer', background: voiceOn ? 'rgba(214,26,26,0.12)' : 'rgba(255,255,255,0.04)', border: `1px solid ${voiceOn ? 'rgba(214,26,26,0.35)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 8, transition: 'all .25s', userSelect: 'none' }}
-          >
-            <div style={{ width: 7, height: 7, borderRadius: '50%', background: voiceOn ? '#d61a1a' : 'rgba(255,255,255,0.22)', boxShadow: voiceOn ? '0 0 8px #d61a1a' : 'none', transition: 'all .3s' }} />
-            <span style={{ fontSize: 13, color: voiceOn ? '#fff' : 'rgba(255,255,255,0.42)', fontWeight: 500 }}>{voiceOn ? 'Voice On' : 'Voice Off'}</span>
-          </div>
-        </Glass>
-
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, gap: 8 }}>
         {/* Messages */}
         <div style={{ flex: 1, overflowY: 'auto', paddingRight: 4 }}>
           {msgs.map((m, i) => (
@@ -663,19 +643,31 @@ function DebriefScreen({ name, file }) {
         </div>
 
         {/* Input bar */}
-        <Glass style={{ padding: '10px 14px', display: 'flex', gap: 10, alignItems: 'flex-end', flexShrink: 0 }}>
+        <Glass style={{ padding: '10px 14px', display: 'flex', gap: 8, alignItems: 'flex-end', flexShrink: 0, marginTop: 0 }}>
           <textarea
             ref={taRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(input); } }}
             onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px'; }}
-            placeholder={isListening ? 'Listening...' : 'Type your response — or tap the mic...'}
+            placeholder={isListening ? 'Listening...' : 'Type your response...'}
             rows={1}
             style={{ flex: 1, background: 'transparent', border: 'none', color: '#fff', fontSize: 15, fontFamily: 'inherit', outline: 'none', lineHeight: 1.55, maxHeight: 120, overflowY: 'auto', paddingTop: 5 }}
           />
 
-          {/* Mic button */}
+          {/* Voice toggle */}
+          <button
+            onClick={() => { const n = !voiceOn; setVoiceOn(n); if (!n) stopSpeaking(); }}
+            title={voiceOn ? 'Voice On' : 'Voice Off'}
+            style={{ width: 42, height: 42, borderRadius: '50%', border: 'none', flexShrink: 0, cursor: 'pointer', background: voiceOn ? 'rgba(214,26,26,0.18)' : 'rgba(255,255,255,0.07)', transition: 'all .2s', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill={voiceOn ? '#d61a1a' : 'rgba(255,255,255,0.35)'} />
+              {voiceOn && <><path d="M15.54 8.46a5 5 0 0 1 0 7.07" stroke="#d61a1a" strokeWidth="2" strokeLinecap="round"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14" stroke="#d61a1a" strokeWidth="2" strokeLinecap="round"/></>}
+            </svg>
+          </button>
+
+          {/* Mic button — only when voice on */}
           {voiceOn && (
             <button
               onClick={toggleListen}
