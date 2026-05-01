@@ -221,6 +221,8 @@ function ProfilePanel({ name, snapshot }) {
 // ─── MESSAGE BUBBLE ───────────────────────────────────────────────────────────
 function Bubble({ msg, isLast, isSpeaking, analyserRef }) {
   const ai = msg.role === 'assistant';
+  // Don't render empty streaming placeholders
+  if (ai && !msg.content) return null;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: ai ? 'flex-start' : 'flex-end', marginBottom: 18 }}>
       {ai && (
@@ -658,13 +660,12 @@ function DebriefScreen({ name, file }) {
           {/* Voice toggle */}
           <button
             onClick={() => { const n = !voiceOn; setVoiceOn(n); if (!n) stopSpeaking(); }}
-            title={voiceOn ? 'Voice On' : 'Voice Off'}
-            style={{ width: 42, height: 42, borderRadius: '50%', border: 'none', flexShrink: 0, cursor: 'pointer', background: voiceOn ? 'rgba(214,26,26,0.18)' : 'rgba(255,255,255,0.07)', transition: 'all .2s', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}
+            style={{ height: 42, padding: '0 14px', borderRadius: 10, border: `1px solid ${voiceOn ? 'rgba(214,26,26,0.45)' : 'rgba(255,255,255,0.12)'}`, flexShrink: 0, cursor: 'pointer', background: voiceOn ? 'rgba(214,26,26,0.15)' : 'rgba(255,255,255,0.04)', transition: 'all .2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill={voiceOn ? '#d61a1a' : 'rgba(255,255,255,0.35)'} />
-              {voiceOn && <><path d="M15.54 8.46a5 5 0 0 1 0 7.07" stroke="#d61a1a" strokeWidth="2" strokeLinecap="round"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14" stroke="#d61a1a" strokeWidth="2" strokeLinecap="round"/></>}
-            </svg>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: voiceOn ? '#d61a1a' : 'rgba(255,255,255,0.25)', boxShadow: voiceOn ? '0 0 6px #d61a1a' : 'none', transition: 'all .3s', flexShrink: 0 }} />
+            <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13, fontWeight: 700, letterSpacing: '0.08em', color: voiceOn ? '#fff' : 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap' }}>
+              {voiceOn ? 'VOICE ON' : 'VOICE OFF'}
+            </span>
           </button>
 
           {/* Mic button — only when voice on */}
