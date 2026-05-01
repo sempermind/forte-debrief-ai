@@ -389,11 +389,9 @@ function DebriefScreen({ name, file }) {
         const data = await res.json();
         if (data.error) throw new Error(data.error);
 
-        const cleanReply = data.text;
-
-        // Parse graph data from the server-provided graphDataLine
-        if (data.graphDataLine) {
-          const line = data.graphDataLine;
+        const parseGraphData = (graphDataLine) => {
+          if (!graphDataLine) return;
+          const line = graphDataLine;
           const parseNums = (key) => {
             const m = line.match(new RegExp(key + '=\\[([^\\]]+)\\]'));
             return m ? m[1].split(',').map((n) => parseInt(n.trim())) : null;
@@ -413,16 +411,34 @@ function DebriefScreen({ name, file }) {
             stamina: parseStr('stamina') || prev.stamina,
             goals: parseStr('goals') || prev.goals,
           }));
-        }
+        };
 
-        // Store full history with PDF on first message
-        fullHistoryRef.current = [
-          { role: 'user', content: firstUserContent, _pdfBase64: pdfBase64 },
-          { role: 'assistant', content: cleanReply },
-        ];
+        // Add streaming placeholder
+        setMsgs([{ role: 'assistant', content: '', streaming: true }]);
 
-        setMsgs([{ role: 'assistant', content: cleanReply }]);
-        extractSnap(cleanReply);
+        const firstHistory = [{ role: 'user', content: firstUserContent, _pdfBase64: pdfBase64 }];
+
+        await streamCall(
+          firstHistory,
+          pdfBase64,
+          () => {}, // no chunk handler needed — we wait for done
+          (data) => {
+            parseGraphData(data.graphDataLine);
+            const aiMsg = { role: 'assistant', content: data.text };
+            fullHistoryRef.current = [
+              { role: 'user', content: firstUserContent, _pdfBase64: pdfBase64 },
+              aiMsg,
+            ];
+            setMsgs([aiMsg]);
+            extractSnap(data.text);
+            setLoading(false);
+          },
+          (e) => {
+            setMsgs([{ role: 'assistant', content: `Something went wrong: ${e.message}. Please refresh and try again.` }]);
+            setLoading(false);
+          }
+        );
+        return; // setLoading handled in callbacks
       } catch (e) {
         setMsgs([{ role: 'assistant', content: `Something went wrong: ${e.message}. Please refresh and try again.` }]);
       }
@@ -503,6 +519,47 @@ function DebriefScreen({ name, file }) {
     setIsSpeaking(false);
   };
 
+  // Shared streaming call used by both init and send
+  const streamCall = async (history, pdfBase64, onChunk, onDone, onError) => {
+    const apiMessages = history.map((m) => ({ role: m.role, content: m.content }));
+    try {
+      const res = await fetch('/api/debrief', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, pdfBase64, messages: apiMessages }),
+      });
+      if (!res.ok) throw new Error('Request failed');
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          try {
+            const parsed = JSON.parse(line);
+            if (parsed.done) {
+              onDone(parsed);
+            }
+          } catch {}
+        }
+      }
+      // Handle any remaining buffer
+      if (buffer.trim()) {
+        try {
+          const parsed = JSON.parse(buffer);
+          if (parsed.done) onDone(parsed);
+        } catch {}
+      }
+    } catch (e) {
+      onError(e);
+    }
+  };
+
   const send = async (text) => {
     if (!text.trim() || loading) return;
     stopSpeaking();
@@ -512,33 +569,46 @@ function DebriefScreen({ name, file }) {
     if (taRef.current) taRef.current.style.height = 'auto';
     setLoading(true);
 
-    try {
-      // Build full history for API — first msg gets PDF, rest are plain text
-      const history = [...fullHistoryRef.current, userMsg];
-      const pdfBase64 = fullHistoryRef.current[0]?._pdfBase64;
+    // Add streaming placeholder bubble
+    setMsgs((prev) => [...prev, { role: 'assistant', content: '', streaming: true }]);
 
-      const apiMessages = history.map((m, i) => ({
-        role: m.role,
-        content: m.content,
-      }));
+    const history = [...fullHistoryRef.current, userMsg];
+    const pdfBase64 = fullHistoryRef.current[0]?._pdfBase64;
 
-      const res = await fetch('/api/debrief', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, pdfBase64, messages: apiMessages }),
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-
-      const aiMsg = { role: 'assistant', content: data.text };
-      fullHistoryRef.current = [...history, aiMsg];
-      setMsgs((prev) => [...prev, aiMsg]);
-      extractSnap(data.text);
-      if (voiceOn) speakText(data.text);
-    } catch (e) {
-      setMsgs((prev) => [...prev, { role: 'assistant', content: `Something went wrong — ${e.message}. Please try again.` }]);
-    }
-    setLoading(false);
+    await streamCall(
+      history,
+      pdfBase64,
+      (chunk) => {
+        setMsgs((prev) => {
+          const updated = [...prev];
+          const last = updated[updated.length - 1];
+          if (last?.streaming) updated[updated.length - 1] = { ...last, content: last.content + chunk };
+          return updated;
+        });
+      },
+      (data) => {
+        const finalText = data.text;
+        const aiMsg = { role: 'assistant', content: finalText };
+        fullHistoryRef.current = [...history, aiMsg];
+        setMsgs((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = aiMsg;
+          return updated;
+        });
+        extractSnap(finalText);
+        if (voiceOn) speakText(finalText);
+        setLoading(false);
+      },
+      (e) => {
+        setMsgs((prev) => {
+          const updated = [...prev];
+          // Remove streaming placeholder
+          if (updated[updated.length - 1]?.streaming) updated.pop();
+          return [...updated, { role: 'assistant', content: `Something went wrong — ${e.message}. Please try again.` }];
+        });
+        setLoading(false);
+      }
+    );
   };
 
   const toggleListen = () => {
@@ -650,7 +720,7 @@ export default function Page() {
       {/* Top nav */}
       <div style={{ position: 'relative', zIndex: 2, borderBottom: '1px solid rgba(255,255,255,0.055)', padding: '11px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(8,8,8,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <img src="/Logo Only Transparent.png" alt="Semper Mind" style={{ height: 44, width: 'auto', objectFit: 'contain' }} />
+          <img src="/Logo Only Transparent.png" alt="Semper Mind" style={{ height: 56, width: 'auto', objectFit: 'contain' }} />
           <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 15, fontWeight: 700, color: '#fff', letterSpacing: '0.12em' }}>SEMPER MIND</span>
         </div>
         {screen === 'debrief' && (
