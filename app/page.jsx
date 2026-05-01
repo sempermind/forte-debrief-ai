@@ -225,7 +225,7 @@ function Bubble({ msg, isLast, isSpeaking, analyserRef }) {
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: ai ? 'flex-start' : 'flex-end', marginBottom: 18 }}>
       {ai && (
         <div style={{ marginBottom: 6, paddingLeft: 2 }}>
-          <img src="/Logo Only Transparent.png" alt="Semper Mind" style={{ height: 22, width: 'auto', objectFit: 'contain' }} />
+          <img src="/Logo Only Transparent.png" alt="Semper Mind" style={{ height: 36, width: 'auto', objectFit: 'contain' }} />
         </div>
       )}
       <div style={{
@@ -643,7 +643,7 @@ function DebriefScreen({ name, file }) {
         </div>
 
         {/* Input bar */}
-        <Glass style={{ padding: '10px 14px', display: 'flex', gap: 8, alignItems: 'flex-end', flexShrink: 0, marginTop: 0 }}>
+        <Glass style={{ padding: '10px 14px', display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0, marginTop: 0 }}>
           <textarea
             ref={taRef}
             value={input}
@@ -652,7 +652,7 @@ function DebriefScreen({ name, file }) {
             onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px'; }}
             placeholder={isListening ? 'Listening...' : 'Type your response...'}
             rows={1}
-            style={{ flex: 1, background: 'transparent', border: 'none', color: '#fff', fontSize: 15, fontFamily: 'inherit', outline: 'none', lineHeight: 1.55, maxHeight: 120, overflowY: 'auto', paddingTop: 5 }}
+            style={{ flex: 1, background: 'transparent', border: 'none', color: '#fff', fontSize: 15, fontFamily: 'inherit', outline: 'none', lineHeight: 1.55, maxHeight: 120, overflowY: 'auto', paddingTop: 0, alignSelf: 'center' }}
           />
 
           {/* Voice toggle */}
