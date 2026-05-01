@@ -312,7 +312,7 @@ function UploadScreen({ onComplete }) {
           <input
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            placeholder="e.g. CEO, Sales Manager, HR Director..."
+            placeholder=""
             onKeyDown={(e) => e.key === 'Enter' && ready && onComplete({ name: name.trim(), role: role.trim(), file })}
             style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#fff', fontSize: 16, padding: '14px 18px', outline: 'none', fontFamily: 'inherit' }}
           />
